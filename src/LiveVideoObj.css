@@ -1,0 +1,195 @@
+#mediaContainer {
+    border: 1px solid black;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+#mediaContainer>div[style*="lightgrey"] {
+    overflow-y: auto;
+}
+
+.searchIcon {
+    display: inline-block;
+    margin-right: 2px;
+}
+
+.mediaTab {
+    margin: 2px 2px;
+    padding: 5px 5px;
+    cursor: pointer;
+}
+
+.mediaTab.active {
+    background-color: #b5e8fc;
+    border: 1px solid #005658;
+}
+
+.mediaSettings {
+    margin-top: 20px;
+}
+
+#toolbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border: #005658 5px solid;
+    border-radius: 5px;
+    width: 390px;
+    z-index: 5;
+}
+
+#toolboxSettings::-webkit-scrollbar {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    display: none;
+}
+
+#mediaDisplay {
+    border: 3px solid rgba(0, 0, 0, 0.9);
+    border-radius: 3px;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+#mediaDisplay::-webkit-scrollbar {
+    display: none;
+}
+
+.canvas-container {
+    position: relative;
+    width: 340px;
+    height: 300px;
+    /* border: 1px solid black; */
+    display: inline-block;
+    margin: 10px;
+    border-radius: 5px;
+    border: 5px solid rgba(247, 150, 70, 255);
+    background-color: rgb(172, 101, 73);
+    padding: 5px;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#video {
+    position: absolute;
+    width: 320px;
+}
+
+label {
+    align-self: center;
+}
+
+#base_video_div_ {
+    border-radius: 5px;
+    border: 3px solid rgba(0, 0, 0, 255);
+    background-color: rgb(207, 231, 223);
+    padding: 5px;
+}
+
+.base_video {
+    width: 300px;
+    display: block;
+    padding: 3px;
+    border-radius: 5px;
+}
+
+#mediaDisplay {
+    height: 200px;
+    background-color: white;
+}
+
+textarea {
+    resize: none;
+    height: 24px;
+    width: 48px;
+}
+
+img {
+    overflow-clip-margin: content-box;
+    overflow: clip;
+}
+
+input {
+    padding: 3px;
+    margin: 2px;
+}
+
+#searchBar>button {
+    padding: 3px;
+    margin: 3px;
+}
+
+#toolboxheader {
+    padding: 5px;
+    cursor: move;
+    z-index: 10;
+    background-color: #2196F3;
+    color: #fff;
+}
+
+#base_video_div_header {
+    padding: 5px;
+    cursor: move;
+    z-index: 10;
+    background-color: #21f344;
+    color: #fff;
+}
+
+.parent {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+.parent div {
+    padding: 50px;
+    background-color: rgba(0, 0, 0, 0.5);
+    grid-row-start: 1;
+    grid-column-start: 1;
+}
+
+#timeValue {
+    width: 48px;
+    height: 32px;
+    margin: 3px;
+}
+
+#imageSettings>div {
+    margin: 3px;
+}
+
+#goButton {
+    width: 64px;
+}
+
+#TextEditor {
+    margin: 5px;
+}
+
+#textInput {
+    margin: 3px;
+}
+
+#StrokeSizeEditor {
+    display: flex;
+}
+
+#textAngleValue {
+    resize: none;
+    width: 64px;
+}
+
+#mediaContainer {
+    margin: 4px 0px;
+}
+
+textarea {
+    resize: none;
+    width: 64px;
+}
+

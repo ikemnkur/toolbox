@@ -82,10 +82,14 @@ function App() {
     const saveCanvasDrawing = () => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
-        let link = document.createElement('a');
-        link.download = 'drawing.png';
-        link.href = canvas.toDataURL('image/png');
+        // let link = document.createElement('a');
+        const link = document.createElement('a');
+        link.download = 'canvas-image.png';
+        link.href = canvasRef.current.toDataURL();
         link.click();
+        // link.download = 'drawing.png';
+        // link.href = canvas.toDataURL('image/png');
+        // link.click();
     }
 
     const saveScreenshot = () => {
@@ -106,9 +110,9 @@ function App() {
         temporaryCtx.drawImage(canvas, 0, 0);
 
         // Now save this composite image.
-        let link = document.createElement('a');
-        link.download = 'screenshot.png';
-        link.href = temporaryCanvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'canvas-image.png';
+        link.href = canvasRef.current.toDataURL();
         link.click();
     }
 
@@ -152,8 +156,8 @@ function App() {
                     </div>
                     <div id="toolboxSettings" style={{ maxHeight: 500, overflowY: "scroll" }}>
                         <button id="clear" onClick={clearCanvas}>Clear</button>
-                        <button id="saveCanvas">Save Drawing</button>
-                        <button id="saveScreenshot">Save Screenshot</button>
+                        <button id="saveCanvas" onClick={saveCanvasDrawing}>Save Drawing</button>
+                        <button id="saveScreenshot" onClick={saveScreenshot}>Save Screenshot</button>
                         <br />
                         <div id="mousePositions">
                             <text>

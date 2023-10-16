@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import Draggable from 'react-draggable';
 import './App.css';
-// import ToolBox from './toolbox';
 
 const videoConstraints = {
     facingMode: 'user'
@@ -12,42 +11,87 @@ function App() {
     const [toolboxMode, setToolboxMode] = useState('view');
     const [lineColor, setLineColor] = useState('black');
     const [lineThickness, setLineThickness] = useState(5);
-    const [lineOpacity, setLineOpacity] = useState(1);
+    const [lineOpacity, setLineOpacity] = useState(100);
     const [drawing, setDrawing] = useState(false);
     const [position, setPosition] = useState({ x: 0, y: 0 });
 
     const webcamRef = useRef(null);
-    const canvasRef = useRef(null);
+    const drawCanvasRef = useRef(null); 
+    const videoRef = useRef(null);
+
+    const modeSelectorRef = useRef(null);
+
+    const canvasVideoRef = useRef(null);
+    const eraseCanvasRef = useRef(null);
     const textCanvasRef = useRef(null);
+    const compositeCanvasRef = useRef(null);
+
+    const toolboxModeRef = useRef(null);
+    const colorPickerRef = useRef(null);
+    const opacitySliderRef = useRef(null);
 
     const [videoSize, setVideoSize] = useState({
         width: '320px',  // Initial width
         height: '240px'  // Initial height
     });
-    // Event handler to update video size
-    const increaseSize = () => {
-        setVideoSize({
-            width: '600px',  // New width
-            height: '400px'  // New height
-        });
-    };
 
-    const decreaseSize = () => {
-        setVideoSize({
-            width: '320px',  // Reset width
-            height: '240px'  // Reset height
-        });
-    };
+    useEffect(() => {
+        // Set up webcam access
+        const initWebcam = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoRef.current.srcObject = stream;
+                videoRef.current.play();
 
-    const setupCanvas = () => {
-        let canvas = canvasRef.current;
-        let webcam = webcamRef.current;
-        let w = 320; let h = 240;
-        canvas.height = h;
-        canvas.width = w;
-        webcam.height = h;
-        webcam.width = w;
-    }
+                // Start the rendering loop
+                drawToCanvas();
+            } catch (err) {
+                console.error("Error accessing webcam:", err);
+            }
+        };
+
+        const drawToCanvas = () => {
+            const video = videoRef.current;
+            const canvas = canvasVideoRef.current;
+            const ctx = canvas.getContext('2d');
+
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                // Draw the current video frame to canvas
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            }
+
+            // Continue drawing the next frame to canvas
+            requestAnimationFrame(drawToCanvas);
+        };
+
+        initWebcam();
+        
+        return () => {
+            // Cleanup: stop any streams to release webcam access
+            if (videoRef.current && videoRef.current.srcObject) {
+                const tracks = videoRef.current.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+        };
+    }, []);
+
+
+
+
+    // // Event handler to update video size
+    // const increaseSize = () => {
+    //     setVideoSize({
+    //         width: '600px',  // New width
+    //         height: '400px'  // New height
+    //     });
+    // };
+
+    // const decreaseSize = () => {
+    //     setVideoSize({
+    //         width: '320px',  // Reset width
+    //         height: '240px'  // Reset height
+    //     });
+    // };
 
     const handleStartDrawing = (e) => {
         setDrawing(true);
@@ -56,17 +100,29 @@ function App() {
 
     const handleDraw = (e) => {
         if (!drawing) return;
-        const canvas = canvasRef.current;
+        const canvas = drawCanvasRef.current;
         const ctx = canvas.getContext('2d');
+        const toolboxMode = toolboxModeRef.current;
+        // const strokeSizeSlider = str
 
-        ctx.beginPath();
-        ctx.strokeStyle = lineColor;
-        ctx.lineWidth = lineThickness;
-        ctx.globalAlpha = lineOpacity/100;
-        ctx.lineCap = "round";
-        ctx.moveTo(position.x, position.y);
-        ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-        ctx.stroke();
+        if (toolboxMode.value === 'erase') {
+            // let radius = strokeSizeSlider.value;
+            ctx.globalCompositeOperation = 'destination-out';
+            let size = lineThickness * 2;
+            ctx.fillRect(position.x - size / 2, position.y - size / 2, size, size);
+            // context.arc(x2, y2, radius, 0, Math.PI * 2);
+            ctx.fill();
+        } else { 
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.beginPath();
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = lineThickness;
+            ctx.globalAlpha = lineOpacity/100;
+            ctx.lineCap = "round";
+            ctx.moveTo(position.x, position.y);
+            ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+            ctx.stroke();
+        }
 
         setPosition({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
     };
@@ -74,69 +130,125 @@ function App() {
     const handleStopDrawing = () => {
         setDrawing(false);
     };
+
+    const showEraser = () => {
+        const eraserCanvas =  eraseCanvasRef.current;
+        if(toolboxMode == 'erase')
+            eraserCanvas.style.display = 'block';
+
+    }
+
+    const doErasing = () => {
+        if(toolboxMode === 'erase'){
+            const drawCanvas = drawCanvasRef.current;
+            const eraserCanvas = eraseCanvasRef.current;
+            let eraseCTX = eraserCanvas.getContext('2d');
+            let size = lineThickness * 2;
+            
+            eraseCTX.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            // mainCTX.clearRect(x - size / 2, y - size / 2, size, size);
+            eraseCTX.save();
+            eraseCTX.globalCompositeOperation = 'source-over';
+            eraseCTX.fillStyle = 'white';
+            eraseCTX.strokeStyle = 'black';
+            eraseCTX.lineWidth = 1;
+            eraseCTX.fillRect(position.x - size / 2, position.y - size / 2, size, size);
+            eraseCTX.strokeRect(position.x - size / 2, position.y - size / 2, size, size);
+            eraseCTX.restore();
+        }
+    }
+
+    const hideEraser = () => {
+        const eraserCanvas =  eraseCanvasRef.current;
+        if(toolboxMode == 'erase')
+            eraserCanvas.style.display = 'none';
+    }
     
     const changeToolboxMode = () => {
         
     };
 
+        
     const saveCanvasDrawing = () => {
-        const canvas = canvasRef.current;
+        const canvas = drawCanvasRef.current;
         const ctx = canvas.getContext('2d');
-        // let link = document.createElement('a');
+
         const link = document.createElement('a');
         link.download = 'canvas-image.png';
-        link.href = canvasRef.current.toDataURL();
+        link.href = drawCanvasRef.current.toDataURL();
         link.click();
-        // link.download = 'drawing.png';
-        // link.href = canvas.toDataURL('image/png');
-        // link.click();
     }
 
     const saveScreenshot = () => {
-        const canvas = canvasRef.current;
+        const canvas = drawCanvasRef.current;
         const ctx = canvas.getContext('2d');
         let video = webcamRef.current;
 
-        let temporaryCanvas = document.createElement('canvas');
-        let temporaryCtx = temporaryCanvas.getContext('2d');
+        const ctxComposite = compositeCanvasRef.current.getContext('2d');
 
-        temporaryCanvas.width = canvas.width;
-        temporaryCanvas.height = canvas.height;
+        ctxComposite.drawImage(canvas, 0, 0);
+        captureFrame();
 
-        // Draw the video frame to the temporary drawCanvas.
-        temporaryCtx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Then draw the main canvas (drawing) on top of that.
-        temporaryCtx.drawImage(canvas, 0, 0);
-
-        // Now save this composite image.
+        // Download the composite canvas image
         const link = document.createElement('a');
-        link.download = 'canvas-image.png';
-        link.href = canvasRef.current.toDataURL();
+        link.download = 'composite-image.png';
+        link.href = compositeCanvasRef.current.toDataURL();
         link.click();
     }
 
     const clearCanvas = () => {
-        const canvas = canvasRef.current;
+        const canvas = drawCanvasRef.current;
         const ctx = canvas.getContext('2d');
-        const textCanvas = canvasRef.current;
+        const textCanvas = drawCanvasRef.current;
         const textCTX = textCanvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         textCTX.clearRect(0, 0, textCanvas.width, textCanvas.height);
     }
 
+    const captureFrame = () => {
+        const video = videoRef.current;
+        const canvas = compositeCanvasRef.current;
+        const ctx = canvas.getContext('2d');
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    };
+
+
+    const handleVideoLoaded = () => {
+        // The video has loaded metadata such as dimensions, duration, etc.
+        // Here, you can set the canvas dimensions to match the video if desired.
+        const video = webcamRef.current;
+        const canvas = drawCanvasRef.current;
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+    };
+
     return (
         <div className="app">
             <Webcam width={videoSize.width} height={videoSize.height}
                 audio={false} ref={webcamRef} screenshotFormat="image/jpeg" videoConstraints={videoConstraints} />
+            
+            <video ref={videoRef} style={{ display: 'none' }}></video>
+{/*             
             <button onClick={increaseSize}>Increase Size</button>
-            <button onClick={decreaseSize}>Decrease Size</button>
+            <button onClick={decreaseSize}>Decrease Size</button> */}
 
             <canvas width={videoSize.width} height={videoSize.height}
-                ref={canvasRef} onMouseDown={handleStartDrawing} onMouseMove={handleDraw} onMouseUp={handleStopDrawing} />
+                ref={canvasVideoRef} />
+            
+            <canvas width={videoSize.width} height={videoSize.height}
+                ref={drawCanvasRef} onMouseDown={handleStartDrawing} onMouseMove={handleDraw} onMouseUp={handleStopDrawing} />
+            
+            <canvas width={videoSize.width} height={videoSize.height}
+                ref={eraseCanvasRef} onMouseDown={showEraser} onMouseMove={doErasing} onMouseUp={hideEraser} />
+            
             <canvas width={videoSize.width} height={videoSize.height}
                 ref={textCanvasRef} onMouseDown={handleStartDrawing} onMouseMove={handleDraw} onMouseUp={handleStopDrawing} />
             
+            <canvas ref={compositeCanvasRef} width={videoSize.width} height={videoSize.height} style={{ display: 'none' }}></canvas>
+     
+
             <Draggable handle=".handle">
                 <div className="settings">
                     {/* Settings Controls */}
@@ -171,7 +283,7 @@ function App() {
                         </div>
                         <div style={{ marginTop: 5 }}>
                             <label htmlFor="mode">Mode: </label>
-                            <select id="mode" value={toolboxMode} onChange={(e) => {setToolboxMode(e.target.value); changeToolboxMode()}}>
+                            <select id="mode" ref={toolboxModeRef} value={toolboxMode} onChange={(e) => {setToolboxMode(e.target.value); changeToolboxMode()}}>
                                 {/* // onChange={changeToolboxMode}> */}
                                 <option value="view" selected=""> View </option>
                                 <option value="draw">Draw</option>
@@ -183,11 +295,11 @@ function App() {
                         </div>
                         <div id="ColorEditor">
                             <label htmlFor="color">Color: </label>
-                            <input type="color" value={lineColor} onChange={(e) => setLineColor(e.target.value)} />
+                            <input type="color" value={lineColor} ref={colorPickerRef} onChange={(e) => setLineColor(e.target.value)} />
                         </div>
                         <div id="OpacityEditor">
                             <label>Opacity:</label>
-                            <input type="range" id="stroke-size" min={1} max={100} defaultValue={100} value={lineOpacity} onChange={(e) => setLineOpacity(e.target.value)} /> 
+                            <input ref={opacitySliderRef} type="range" id="stroke-size" min={1} max={100} defaultValue={50} value={lineOpacity} onChange={(e) => setLineOpacity(e.target.value)} /> 
                         </div>
                         <div id="eraseMode" style={{ display: "none" }}>
                             <label>Erase Mode:</label>
@@ -493,6 +605,8 @@ function App() {
 
             </Draggable>
            
+
+           {/* <webcam2Canvas></webcam2Canvas> */}
         </div>
     );
 }

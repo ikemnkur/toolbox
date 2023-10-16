@@ -5,6 +5,7 @@ import App from './App';
 import Toolbox from './toolbox';
 import LiveVideoObj from './LiveVideoObj';
 import reportWebVitals from './reportWebVitals';
+import WebcamToCanvas from './WebcamToCanvas';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -12,6 +13,7 @@ root.render(
     <App />
     {/* <Toolbox /> */}
     {/* <LiveVideoObj /> */}
+    {/* <WebcamToCanvas /> */}
   </React.StrictMode>
 );
 

@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 
 import './toolbox.css';
 
-var ToolBox = () => {
+var ToolBox = ({changeToolboxMode}) => {
     const [input, setInput] = useState('');
     const [result, setResult] = useState('');
+
 
     // function changeToolboxMode(e) {
 
@@ -90,8 +91,7 @@ var ToolBox = () => {
                 </div>
                 <div style={{ marginTop: 5 }}>
                     <label htmlFor="mode">Mode: </label>
-                    <select id="mode">
-                        {/* // onChange={changeToolboxMode}> */}
+                    <select id="mode" onChange={changeToolboxMode}>
                         <option value="view" selected="">
                             View
                         </option>
@@ -161,7 +161,7 @@ var ToolBox = () => {
                     </div>
                     <div>
                         <label htmlFor="fontSize">Font Size: </label>
-                        <select id="fontSize">
+                        <select id="fontSize" value={""}>
                             <option value={28}>28</option>
                             <option value={12}>12</option>
                             <option value={14}>14</option>

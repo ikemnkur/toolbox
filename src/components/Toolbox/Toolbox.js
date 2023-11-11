@@ -306,7 +306,7 @@ export default function Toolbox({ clearCanvas, saveCanvasDrawing, saveScreenshot
                                         <label>%</label>
                                     </div>
                                 </div>
-
+                                {/*  scaling images */}
                                 <div style={{ display: "flex" }} id="SsizeSliderDiv" ref={SsizeSliderDivRef}>
                                     <label>Size:</label>
                                     <input
@@ -324,7 +324,7 @@ export default function Toolbox({ clearCanvas, saveCanvasDrawing, saveScreenshot
                                         style={{ resize: "none" }}
                                         defaultValue={"50"}
                                         onChange={updateSizeValue}
-                                    />
+                                    />{"%"}
                                 </div>
                                 <div style={{ display: "flex" }} id="angleSliderDiv" ref={angleSliderDivRef}>
                                     <label>Angle:</label>
